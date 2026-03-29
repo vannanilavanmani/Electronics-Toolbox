@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Electronics Toolbox</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0e1a;
+      --panel: #0f1525;
+      --border: #1e2d4a;
+      --accent: #00d4ff;
+      --accent2: #ff6b35;
+      --accent3: #39ff14;
+      --text: #c8d8e8;
+      --muted: #4a6080;
+      --glow: 0 0 20px rgba(0,212,255,0.3);
+      --glow2: 0 0 20px rgba(255,107,53,0.3);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Exo 2', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Scanline */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.05) 2px,
+        rgba(0,0,0,0.05) 4px
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeDown 0.8s ease both;
+    }
+
+    .logo-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .logo-icon {
+      font-size: 2rem;
+      animation: pulse 2s infinite;
+    }
+
+    h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 900;
+      background: linear-gradient(90deg, var(--accent), #fff, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.1em;
+    }
+
+    .subtitle {
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--muted);
+      font-size: 0.85rem;
+      letter-spacing: 0.2em;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0;
+      animation: fadeDown 0.8s 0.2s ease both;
+    }
+
+    .tab {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      padding: 0.6rem 1.2rem;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid transparent;
+      border-bottom: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-radius: 4px 4px 0 0;
+      position: relative;
+      top: 1px;
+    }
+
+    .tab:hover { color: var(--accent); border-color: var(--border); }
+
+    .tab.active {
+      color: var(--accent);
+      border-color: var(--border);
+      border-bottom-color: var(--panel);
+      background: var(--panel);
+    }
+
+    /* Panels */
+    .panel {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+    .panel.active { display: block; }
+
+    /* Card */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), transparent);
+    }
+
+    .card-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Form elements */
+    .field-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    input, select {
+      background: rgba(0,212,255,0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 0.8rem;
+      border-radius: 4px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.95rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      width: 100%;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: var(--glow);
+    }
+
+    select option { background: var(--bg); }
+
+    /* Button */
+    .btn {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      padding: 0.75rem 2rem;
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.2s;
+      z-index: -1;
+    }
+
+    .btn:hover {
+      color: var(--bg);
+      box-shadow: var(--glow);
+    }
+
+    .btn:hover::before { transform: scaleX(1); }
+
+    .btn-orange {
+      color: var(--accent2);
+      border-color: var(--accent2);
+    }
+    .btn-orange::before { background: var(--accent2); }
+    .btn-orange:hover { box-shadow: var(--glow2); }
+
+    /* Result box */
+    .result-box {
+      background: rgba(0,212,255,0.05);
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      padding: 1.25rem 1.5rem;
+      margin-top: 1.5rem;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .result-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .result-value {
+      font-size: 1.8rem;
+      color: var(--accent);
+      font-weight: 700;
+      text-shadow: var(--glow);
+    }
+
+    .result-value span {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-left: 0.3rem;
+    }
+
+    .result-row {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .result-item { flex: 1; min-width: 120px; }
+
+    /* Resistor color bands */
+    .resistor-visual {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 1.5rem 0;
+      gap: 0;
+    }
+
+    .resistor-body {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .res-wire {
+      width: 50px;
+      height: 3px;
+      background: var(--muted);
+    }
+
+    .res-body {
+      width: 180px;
+      height: 40px;
+      background: linear-gradient(180deg, #c8a96e, #b8954a);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      padding: 0 12px;
+      position: relative;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .band {
+      width: 16px;
+      height: 36px;
+      border-radius: 2px;
+      transition: background-color 0.3s;
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.2), inset 0 -1px 2px rgba(0,0,0,0.2);
+    }
+
+    .band-gap { width: 8px; }
+
+    .color-swatches {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .swatch {
+      width: 36px;
+      height: 36px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.1s, border-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .swatch:hover { transform: scale(1.15); border-color: white; }
+    .swatch.selected { border-color: white; transform: scale(1.1); box-shadow: 0 0 8px rgba(255,255,255,0.5); }
+
+    /* Band selectors */
+    .band-selectors {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Voltage divider diagram */
+    .vd-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 1rem 0;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .vd-box {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.4rem 0.8rem;
+      text-align: center;
+      min-width: 80px;
+    }
+
+    .vd-wire {
+      width: 2px;
+      height: 20px;
+      background: var(--muted);
+    }
+
+    .vd-label {
+      color: var(--accent2);
+      font-weight: bold;
+    }
+
+    /* Ohm triangle visual */
+    .ohm-triangle {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 1rem 0;
+    }
+
+    .triangle-row {
+      display: flex;
+      gap: 0;
+    }
+
+    .tri-cell {
+      width: 80px;
+      height: 60px;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .tri-cell:hover { background: rgba(0,212,255,0.1); }
+
+    .tri-cell.highlight {
+      background: rgba(0,212,255,0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .tri-sym {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .tri-name {
+      font-size: 0.6rem;
+      color: var(--muted);
+    }
+
+    /* LED section */
+    .led-visual {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin: 1.5rem 0;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+    }
+
+    .led-wire {
+      width: 40px;
+      height: 2px;
+      background: var(--muted);
+    }
+
+    .led-resistor {
+      width: 50px;
+      height: 20px;
+      background: linear-gradient(180deg, #8a7a60, #6b5c40);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .led-symbol {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+
+    .led-on {
+      background: rgba(255,255,100,0.2);
+      box-shadow: 0 0 20px rgba(255,255,100,0.6);
+    }
+
+    /* Capacitor charge */
+    .cap-bar-wrapper {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      height: 20px;
+      margin-top: 1rem;
+      overflow: hidden;
+    }
+
+    .cap-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      width: 0%;
+      transition: width 0.5s;
+      border-radius: 4px;
+    }
+
+    /* Footer info */
+    .formula-note {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-left: 2px solid var(--border);
+    }
+
+    /* Animations */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Error */
+    .error { color: #ff4444; font-size: 0.85rem; margin-top: 0.5rem; font-family: 'Share Tech Mono', monospace; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo-line">
+      <span class="logo-icon">⚡</span>
+      <h1>ELECTRONICS TOOLBOX</h1>
+      <span class="logo-icon">⚡</span>
+    </div>
+    <p class="subtitle">// INTERACTIVE CALCULATORS FOR ENGINEERS & MAKERS //</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" onclick="switchTab('ohm')">⚡ OHM'S LAW</button>
+    <button class="tab" onclick="switchTab('led')">💡 LED RESISTOR</button>
+    <button class="tab" onclick="switchTab('divider')">🔀 VOLTAGE DIVIDER</button>
+    <button class="tab" onclick="switchTab('resistor')">🎨 COLOR CODE</button>
+    <button class="tab" onclick="switchTab('cap')">🔋 CAPACITOR</button>
+  </nav>
+
+  <!-- OHM'S LAW -->
+  <div class="panel active" id="panel-ohm">
+    <div class="card">
+      <div class="card-title">⚡ OHM'S LAW CALCULATOR — V = I × R</div>
+
+      <p style="font-size:0.85rem; color:var(--muted); margin-bottom:1.5rem;">
+        Enter any TWO values — the third will be calculated automatically.
+      </p>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Voltage (V) — Volts</label>
+          <input type="number" id="ohm-v" placeholder="e.g. 12" oninput="calcOhm('v')" />
+        </div>
+        <div class="field">
+          <label>Current (I) — Amps</label>
+          <input type="number" id="ohm-i" placeholder="e.g. 0.5" oninput="calcOhm('i')" />
+        </div>
+        <div class="field">
+          <label>Resistance (R) — Ohms</label>
+          <input type="number" id="ohm-r" placeholder="e.g. 24" oninput="calcOhm('r')" />
+        </div>
+      </div>
+
+      <div class="result-box" id="ohm-result" style="display:none">
+        <div class="result-row" id="ohm-result-row"></div>
+      </div>
+
+      <div id="ohm-power-box" class="result-box" style="display:none; margin-top:1rem; border-color: var(--accent2);">
+        <div class="result-label">Power dissipated</div>
+        <div class="result-value" id="ohm-power" style="color:var(--accent2)"></div>
+      </div>
+
+      <div class="formula-note">
+        V = I × R &nbsp;|&nbsp; I = V / R &nbsp;|&nbsp; R = V / I &nbsp;|&nbsp; P = V × I
+      </div>
+    </div>
+  </div>
+
+  <!-- LED RESISTOR -->
+  <div class="panel" id="panel-led">
+    <div class="card">
+      <div class="card-title">💡 LED CURRENT-LIMITING RESISTOR</div>
+
+      <div class="led-visual">
+        <span style="color:var(--muted); font-size:0.7rem; margin-right:4px">Vs</span>
+        <div class="led-wire"></div>
+        <div class="led-resistor" id="led-res-box">R=?</div>
+        <div class="led-wire" style="width:20px"></div>
+        <div class="led-symbol" id="led-symbol">💡</div>
+        <div class="led-wire"></div>
+        <span style="color:var(--muted); font-size:0.7rem; margin-left:4px">GND</span>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Supply Voltage (Vs) — V</label>
+          <input type="number" id="led-vs" placeholder="e.g. 5" value="5" oninput="calcLED()" />
+        </div>
+        <div class="field">
+          <label>LED Forward Voltage (Vf) — V</label>
+          <select id="led-vf" onchange="calcLED()">
+            <option value="1.8">Red — 1.8V</option>
+            <option value="2.1">Yellow — 2.1V</option>
+            <option value="2.2" selected>Green — 2.2V</option>
+            <option value="3.0">Blue — 3.0V</option>
+            <option value="3.2">White — 3.2V</option>
+            <option value="3.4">UV — 3.4V</option>
+            <option value="custom">Custom…</option>
+          </select>
+          <input type="number" id="led-vf-custom" placeholder="Custom Vf (V)" style="display:none; margin-top:0.4rem" oninput="calcLED()" />
+        </div>
+        <div class="field">
+          <label>LED Current (If) — mA</label>
+          <input type="number" id="led-if" placeholder="e.g. 20" value="20" oninput="calcLED()" />
+        </div>
+      </div>
+
+      <div class="result-box" id="led-result">
+        <div class="result-row">
+          <div class="result-item">
+            <div class="result-label">Required Resistor</div>
+            <div class="result-value" id="led-r">—<span>Ω</span></div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Nearest Standard (E24)</div>
+            <div class="result-value" id="led-std" style="color:var(--accent2)">—<span>Ω</span></div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Power Dissipated</div>
+            <div class="result-value" id="led-p" style="color:var(--accent3)">—<span>mW</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="formula-note">
+        R = (Vs − Vf) / If &nbsp;|&nbsp; Choose nearest E24 value &nbsp;|&nbsp; P = If² × R
+      </div>
+    </div>
+  </div>
+
+  <!-- VOLTAGE DIVIDER -->
+  <div class="panel" id="panel-divider">
+    <div class="card">
+      <div class="card-title">🔀 VOLTAGE DIVIDER CALCULATOR</div>
+
+      <div class="vd-diagram" id="vd-diagram">
+        <div class="vd-box" id="vd-vin-box">Vin = ?</div>
+        <div class="vd-wire"></div>
+        <div class="vd-box">R1 = <span id="vd-r1-label" class="vd-label">?</span></div>
+        <div class="vd-wire"></div>
+        <div style="display:flex; align-items:center; gap:1rem;">
+          <div class="vd-box" style="background:rgba(255,107,53,0.1); border-color:var(--accent2)">
+            Vout = <span id="vd-vout-label" style="color:var(--accent2)">?</span>
+          </div>
+        </div>
+        <div class="vd-wire"></div>
+        <div class="vd-box">R2 = <span id="vd-r2-label" class="vd-label">?</span></div>
+        <div class="vd-wire"></div>
+        <div class="vd-box">GND</div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Input Voltage (Vin) — V</label>
+          <input type="number" id="vd-vin" placeholder="e.g. 12" oninput="calcDivider()" />
+        </div>
+        <div class="field">
+          <label>R1 — Ohms</label>
+          <input type="number" id="vd-r1" placeholder="e.g. 10000" oninput="calcDivider()" />
+        </div>
+        <div class="field">
+          <label>R2 — Ohms</label>
+          <input type="number" id="vd-r2" placeholder="e.g. 4700" oninput="calcDivider()" />
+        </div>
+      </div>
+
+      <div class="result-box" id="vd-result" style="display:none">
+        <div class="result-row">
+          <div class="result-item">
+            <div class="result-label">Output Voltage (Vout)</div>
+            <div class="result-value" id="vd-vout" style="color:var(--accent2)">—<span>V</span></div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Divider Ratio</div>
+            <div class="result-value" id="vd-ratio">—</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Current Draw</div>
+            <div class="result-value" id="vd-current" style="color:var(--accent3)">—<span>mA</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="formula-note">
+        Vout = Vin × R2 / (R1 + R2) &nbsp;|&nbsp; Used for level-shifting and sensor interfacing
+      </div>
+    </div>
+  </div>
+
+  <!-- RESISTOR COLOR CODE -->
+  <div class="panel" id="panel-resistor">
+    <div class="card">
+      <div class="card-title">🎨 RESISTOR COLOR CODE DECODER</div>
+
+      <div class="resistor-visual">
+        <div class="resistor-body">
+          <div class="res-wire"></div>
+          <div class="res-body">
+            <div class="band" id="band-0" style="background:#000"></div>
+            <div class="band" id="band-1" style="background:#8B4513"></div>
+            <div class="band" id="band-2" style="background:#f00"></div>
+            <div style="width:8px"></div>
+            <div class="band" id="band-3" style="background:#f90"></div>
+          </div>
+          <div class="res-wire"></div>
+        </div>
+      </div>
+
+      <div class="band-selectors">
+        <div class="field">
+          <label>Band 1 — First Digit</label>
+          <select id="b0" onchange="calcResColor()">
+            <option value="1,#8B4513">Brown — 1</option>
+            <option value="2,#f00">Red — 2</option>
+            <option value="3,#ff7700">Orange — 3</option>
+            <option value="4,#ffff00">Yellow — 4</option>
+            <option value="5,#00aa00">Green — 5</option>
+            <option value="6,#0044ff">Blue — 6</option>
+            <option value="7,#8800ff">Violet — 7</option>
+            <option value="8,#888">Grey — 8</option>
+            <option value="9,#fff">White — 9</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Band 2 — Second Digit</label>
+          <select id="b1" onchange="calcResColor()">
+            <option value="0,#000">Black — 0</option>
+            <option value="1,#8B4513">Brown — 1</option>
+            <option value="2,#f00">Red — 2</option>
+            <option value="3,#ff7700">Orange — 3</option>
+            <option value="4,#ffff00">Yellow — 4</option>
+            <option value="5,#00aa00">Green — 5</option>
+            <option value="6,#0044ff">Blue — 6</option>
+            <option value="7,#8800ff">Violet — 7</option>
+            <option value="8,#888">Grey — 8</option>
+            <option value="9,#fff">White — 9</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Band 3 — Multiplier</label>
+          <select id="b2" onchange="calcResColor()">
+            <option value="1,#000">Black — ×1</option>
+            <option value="10,#8B4513">Brown — ×10</option>
+            <option value="100,#f00">Red — ×100</option>
+            <option value="1000,#ff7700">Orange — ×1K</option>
+            <option value="10000,#ffff00">Yellow — ×10K</option>
+            <option value="100000,#00aa00">Green — ×100K</option>
+            <option value="1000000,#0044ff">Blue — ×1M</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Band 4 — Tolerance</label>
+          <select id="b3" onchange="calcResColor()">
+            <option value="±1%,#8B4513">Brown — ±1%</option>
+            <option value="±2%,#f00">Red — ±2%</option>
+            <option value="±0.5%,#00aa00">Green — ±0.5%</option>
+            <option value="±0.25%,#0044ff">Blue — ±0.25%</option>
+            <option value="±0.1%,#8800ff">Violet — ±0.1%</option>
+            <option value="±5%,#d4af37" selected>Gold — ±5%</option>
+            <option value="±10%,#aaa">Silver — ±10%</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="result-box">
+        <div class="result-row">
+          <div class="result-item">
+            <div class="result-label">Resistance Value</div>
+            <div class="result-value" id="res-value">—<span>Ω</span></div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Tolerance Range</div>
+            <div class="result-value" id="res-range" style="font-size:1.1rem; color:var(--accent2)">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="formula-note">
+        Value = (digit1 × 10 + digit2) × multiplier &nbsp;|&nbsp; Range = Value ± Tolerance%
+      </div>
+    </div>
+  </div>
+
+  <!-- CAPACITOR -->
+  <div class="panel" id="panel-cap">
+    <div class="card">
+      <div class="card-title">🔋 CAPACITOR CHARGE / TIME CONSTANT (RC)</div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Resistance (R) — Ohms</label>
+          <input type="number" id="cap-r" placeholder="e.g. 10000" value="10000" oninput="calcCap()" />
+        </div>
+        <div class="field">
+          <label>Capacitance (C) — µF</label>
+          <input type="number" id="cap-c" placeholder="e.g. 100" value="100" oninput="calcCap()" />
+        </div>
+        <div class="field">
+          <label>Supply Voltage (Vs) — V</label>
+          <input type="number" id="cap-vs" placeholder="e.g. 5" value="5" oninput="calcCap()" />
+        </div>
+      </div>
+
+      <div class="result-box">
+        <div class="result-row">
+          <div class="result-item">
+            <div class="result-label">Time Constant (τ)</div>
+            <div class="result-value" id="cap-tau">—<span>s</span></div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">63.2% charge at</div>
+            <div class="result-value" id="cap-63" style="color:var(--accent2)">—<span>s</span></div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">99% fully charged at</div>
+            <div class="result-value" id="cap-99" style="color:var(--accent3)">—<span>s</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:1.5rem;">
+        <label style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+          <span>Charge at selected time →</span>
+          <span id="cap-t-label" style="color:var(--accent)">t = 1× τ</span>
+        </label>
+        <input type="range" id="cap-t-slider" min="0" max="500" value="100" oninput="updateCapSlider()" style="width:100%; accent-color:var(--accent);" />
+        <div class="cap-bar-wrapper">
+          <div class="cap-bar" id="cap-charge-bar"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-family:'Share Tech Mono',monospace; font-size:0.75rem; color:var(--muted); margin-top:0.3rem;">
+          <span>0V</span>
+          <span id="cap-v-now" style="color:var(--accent)">— V</span>
+          <span id="cap-vs-label">Vs</span>
+        </div>
+      </div>
+
+      <div class="formula-note">
+        τ = R × C &nbsp;|&nbsp; V(t) = Vs × (1 − e^(−t/τ)) &nbsp;|&nbsp; Full charge ≈ 5τ
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    ⚡ ELECTRONICS TOOLBOX — BUILT FOR MAKERS & ENGINEERS ⚡<br/>
+    <span style="font-size:0.65rem;">All calculations are approximations. Always verify with a multimeter.</span>
+  </footer>
+
+</div>
+
+<script>
+// ─── TAB SWITCHING ───────────────────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const ids = ['ohm','led','divider','resistor','cap'];
+    t.classList.toggle('active', ids[i] === id);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+}
+
+// ─── OHM'S LAW ───────────────────────────────────────────────
+let ohm_lock = null;
+function calcOhm(changed) {
+  const v = parseFloat(document.getElementById('ohm-v').value);
+  const i = parseFloat(document.getElementById('ohm-i').value);
+  const r = parseFloat(document.getElementById('ohm-r').value);
+
+  let result = {};
+
+  if (!isNaN(v) && !isNaN(i)) {
+    const R = v / i;
+    document.getElementById('ohm-r').value = R.toFixed(4);
+    result = { V: v, I: i, R };
+  } else if (!isNaN(v) && !isNaN(r)) {
+    const I = v / r;
+    document.getElementById('ohm-i').value = I.toFixed(6);
+    result = { V: v, I, R: r };
+  } else if (!isNaN(i) && !isNaN(r)) {
+    const V = i * r;
+    document.getElementById('ohm-v').value = V.toFixed(4);
+    result = { V, I: i, R: r };
+  } else {
+    document.getElementById('ohm-result').style.display = 'none';
+    document.getElementById('ohm-power-box').style.display = 'none';
+    return;
+  }
+
+  const P = result.V * result.I;
+
+  document.getElementById('ohm-result').style.display = 'block';
+  document.getElementById('ohm-power-box').style.display = 'block';
+  document.getElementById('ohm-result-row').innerHTML = `
+    <div class="result-item"><div class="result-label">Voltage</div><div class="result-value">${fmtNum(result.V)}<span>V</span></div></div>
+    <div class="result-item"><div class="result-label">Current</div><div class="result-value">${fmtNum(result.I)}<span>A</span></div></div>
+    <div class="result-item"><div class="result-label">Resistance</div><div class="result-value">${fmtNum(result.R)}<span>Ω</span></div></div>
+  `;
+  document.getElementById('ohm-power').innerHTML = `${fmtNum(P)}<span>W</span>`;
+}
+
+// ─── LED RESISTOR ────────────────────────────────────────────
+document.getElementById('led-vf').addEventListener('change', function() {
+  document.getElementById('led-vf-custom').style.display = this.value === 'custom' ? 'block' : 'none';
+  calcLED();
+});
+
+const E24 = [10,11,12,13,15,16,18,20,22,24,27,30,33,36,39,43,47,51,56,62,68,75,82,91];
+function nearestE24(r) {
+  let best = null, bestDiff = Infinity;
+  for (let exp = 0; exp <= 6; exp++) {
+    for (const base of E24) {
+      const val = base * Math.pow(10, exp - 1);
+      const d = Math.abs(val - r);
+      if (d < bestDiff) { bestDiff = d; best = val; }
+    }
+  }
+  return best;
+}
+
+function calcLED() {
+  const vs = parseFloat(document.getElementById('led-vs').value);
+  let vf = document.getElementById('led-vf').value === 'custom'
+    ? parseFloat(document.getElementById('led-vf-custom').value)
+    : parseFloat(document.getElementById('led-vf').value);
+  const ifma = parseFloat(document.getElementById('led-if').value);
+  if (isNaN(vs) || isNaN(vf) || isNaN(ifma) || vs <= vf) {
+    document.getElementById('led-r').innerHTML = 'ERR<span>Ω</span>';
+    return;
+  }
+  const R = (vs - vf) / (ifma / 1000);
+  const std = nearestE24(R);
+  const P = Math.pow(ifma/1000, 2) * R * 1000;
+  document.getElementById('led-r').innerHTML = `${fmtNum(R)}<span>Ω</span>`;
+  document.getElementById('led-std').innerHTML = `${fmtNum(std)}<span>Ω</span>`;
+  document.getElementById('led-p').innerHTML = `${P.toFixed(1)}<span>mW</span>`;
+  document.getElementById('led-res-box').textContent = `${fmtNum(std)}Ω`;
+  document.getElementById('led-symbol').className = 'led-symbol led-on';
+}
+
+// ─── VOLTAGE DIVIDER ─────────────────────────────────────────
+function calcDivider() {
+  const vin = parseFloat(document.getElementById('vd-vin').value);
+  const r1 = parseFloat(document.getElementById('vd-r1').value);
+  const r2 = parseFloat(document.getElementById('vd-r2').value);
+  if (isNaN(vin) || isNaN(r1) || isNaN(r2) || r1+r2 === 0) {
+    document.getElementById('vd-result').style.display = 'none';
+    return;
+  }
+  const vout = vin * r2 / (r1 + r2);
+  const ratio = (vout / vin).toFixed(4);
+  const current = (vin / (r1 + r2)) * 1000;
+  document.getElementById('vd-result').style.display = 'block';
+  document.getElementById('vd-vout').innerHTML = `${vout.toFixed(3)}<span>V</span>`;
+  document.getElementById('vd-ratio').innerHTML = `${ratio}<span></span>`;
+  document.getElementById('vd-current').innerHTML = `${current.toFixed(3)}<span>mA</span>`;
+  document.getElementById('vd-vin-box').textContent = `Vin = ${vin}V`;
+  document.getElementById('vd-r1-label').textContent = fmtNum(r1) + 'Ω';
+  document.getElementById('vd-r2-label').textContent = fmtNum(r2) + 'Ω';
+  document.getElementById('vd-vout-label').textContent = vout.toFixed(2) + 'V';
+}
+
+// ─── RESISTOR COLOR CODE ──────────────────────────────────────
+function calcResColor() {
+  const b0 = document.getElementById('b0').value.split(',');
+  const b1 = document.getElementById('b1').value.split(',');
+  const b2 = document.getElementById('b2').value.split(',');
+  const b3 = document.getElementById('b3').value.split(',');
+
+  document.getElementById('band-0').style.background = b0[1];
+  document.getElementById('band-1').style.background = b1[1];
+  document.getElementById('band-2').style.background = b2[1];
+  document.getElementById('band-3').style.background = b3[1];
+
+  const value = (parseInt(b0[0]) * 10 + parseInt(b1[0])) * parseInt(b2[0]);
+  const tol = b3[0];
+  const tolPct = parseFloat(tol.replace('±','').replace('%','')) / 100;
+  const min = value * (1 - tolPct);
+  const max = value * (1 + tolPct);
+
+  document.getElementById('res-value').innerHTML = `${fmtNum(value)}<span>Ω</span>`;
+  document.getElementById('res-range').innerHTML = `${fmtNum(min)}Ω – ${fmtNum(max)}Ω`;
+}
+
+// ─── CAPACITOR ────────────────────────────────────────────────
+let capTau = 1;
+function calcCap() {
+  const R = parseFloat(document.getElementById('cap-r').value);
+  const C = parseFloat(document.getElementById('cap-c').value) * 1e-6;
+  const Vs = parseFloat(document.getElementById('cap-vs').value);
+  if (isNaN(R) || isNaN(C) || isNaN(Vs)) return;
+  capTau = R * C;
+  document.getElementById('cap-tau').innerHTML = `${fmtNum(capTau)}<span>s</span>`;
+  document.getElementById('cap-63').innerHTML = `${fmtNum(capTau)}<span>s</span>`;
+  document.getElementById('cap-99').innerHTML = `${fmtNum(capTau * 4.6)}<span>s</span>`;
+  document.getElementById('cap-vs-label').textContent = Vs + 'V';
+  updateCapSlider();
+}
+
+function updateCapSlider() {
+  const pct = parseInt(document.getElementById('cap-t-slider').value) / 100;
+  const t = pct * capTau;
+  const Vs = parseFloat(document.getElementById('cap-vs').value) || 5;
+  const Vt = Vs * (1 - Math.exp(-t / capTau));
+  const chargePct = (Vt / Vs) * 100;
+  document.getElementById('cap-charge-bar').style.width = chargePct + '%';
+  document.getElementById('cap-t-label').textContent = `t = ${pct.toFixed(1)}× τ`;
+  document.getElementById('cap-v-now').textContent = Vt.toFixed(3) + 'V (' + chargePct.toFixed(1) + '%)';
+}
+
+// ─── UTILITIES ───────────────────────────────────────────────
+function fmtNum(n) {
+  if (isNaN(n)) return '—';
+  if (Math.abs(n) >= 1e6) return (n/1e6).toFixed(3) + 'M';
+  if (Math.abs(n) >= 1e3) return (n/1e3).toFixed(3) + 'k';
+  if (Math.abs(n) < 0.001) return (n*1e6).toFixed(3) + 'µ';
+  if (Math.abs(n) < 1) return (n*1000).toFixed(3) + 'm';
+  return n.toFixed(4).replace(/\.?0+$/, '');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────
+calcLED();
+calcResColor();
+calcCap();
+</script>
+</body>
+</html>
