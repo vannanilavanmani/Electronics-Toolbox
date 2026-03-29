@@ -1,6 +1,6 @@
 # ⚡ Electronics Toolbox — Week 08 Deployment Assignment
 
-**Live App URL:** `[https://electronics-toolbox.vercel.app](https://electronics-toolbox.vercel.app/)`
+**Live App URL:** `https://electronics-toolbox.vercel.app/`
 
 ---
 
